@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gorilla Horror VR | GitHub</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
+    
+    <script>
+      // GORILLA LOCOMOTION LOGIC
+      AFRAME.registerComponent('gorilla-move', {
+        init: function () {
+          this.el.addEventListener('click', (evt) => {
+            const rig = document.querySelector('#rig');
+            const camera = document.querySelector('#camera');
+            
+            // Get direction camera is facing
+            const direction = new THREE.Vector3();
+            camera.object3D.getWorldDirection(direction);
+            
+            // Push away from where you are looking (The "Fling")
+            // Velocity: X and Z are direction, Y is jump height
+            rig.body.velocity.set(
+              -direction.x * 6, 
+              4, 
+              -direction.z * 6
+            );
+          });
+        }
+      });
+
+      // STALKER AI LOGIC
+      AFRAME.registerComponent('stalker-ai', {
+        tick: function () {
+          const player = document.querySelector('#rig').object3D.position;
+          const monster = this.el.object3D;
+          
+          // Move toward player position
+          let dir = new THREE.Vector3().subVectors(player, monster.position).normalize();
+          monster.position.addScaledVector(dir, 0.03); 
+          
+          // Face the player
+          this.el.object3D.lookAt(player);
+
+          // Check for "Jumpscare" distance
+          if (monster.position.distanceTo(player) < 1.5) {
+            alert("YOU WERE CAUGHT");
+            location.reload();
+          }
+        }
+      });
+    </script>
+</head>
+<body style="margin: 0; overflow: hidden; background: #000;">
+
+    <a-scene physics="gravity: -9.8; debug: false" fog="type: exponential; color: #050505; density: 0.2">
+        
+        <a-entity id="rig" position="0 1.6 0" dynamic-body="mass: 1; shape: sphere">
+            <a-camera id="camera" wasd-controls="enabled: false">
+                <a-entity light="type: spot; intensity: 0.8; distance: 10; angle: 30" position="0.2 -0.2 0"></a-entity>
+                
+                <a-cursor color="red" raycaster="objects: .clickable" gorilla-move></a-cursor>
+            </a-camera>
+        </a-entity>
+
+        <a-entity id="monster" stalker-ai position="0 1 -20">
+            <a-box width="1" height="3" depth="0.5" color="black">
+                <a-sphere color="red" radius="0.1" position="-0.2 1 0.3"></a-sphere>
+                <a-sphere color="red" radius="0.1" position="0.2 1 0.3"></a-sphere>
+            </a-box>
+        </a-entity>
+
+        <a-plane class="clickable" static-body rotation="-90 0 0" width="100" height="100" color="#111"></a-plane>
+
+        <a-box class="clickable" static-body position="-5 2 -10" width="2" height="5" color="#222"></a-box>
+        <a-box class="clickable" static-body position="5 2 -10" width="2" height="5" color="#222"></a-box>
+        <a-box class="clickable" static-body position="0 2 10" width="10" height="5" color="#222"></a-box>
+
+        <a-sky color="#050505"></a-sky>
+        <a-entity light="type: ambient; color: #111; intensity: 0.1"></a-entity>
+
+    </a-scene>
+
+</body>
+</html>
