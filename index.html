@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Gorilla Explorer VR</title>
+    <title>Bright Gorilla VR</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
     
@@ -16,58 +16,42 @@
             const direction = new THREE.Vector3();
             camera.object3D.getWorldDirection(direction);
             
-            // Fling logic
-            rig.body.velocity.set(-direction.x * 6, 5, -direction.z * 6);
+            // Fling logic: X and Z for push, Y for jump
+            rig.body.velocity.set(-direction.x * 7, 5, -direction.z * 7);
           });
-        }
-      });
-
-      // IMMORTAL STALKER AI
-      AFRAME.registerComponent('stalker-ai', {
-        tick: function () {
-          const player = document.querySelector('#rig').object3D.position;
-          const monster = this.el.object3D;
-          
-          let dir = new THREE.Vector3().subVectors(player, monster.position).normalize();
-          monster.position.addScaledVector(dir, 0.02); // Slightly slower stalker
-          monster.lookAt(player);
-
-          // REPEL LOGIC (Instead of Dying)
-          if (monster.position.distanceTo(player) < 2) {
-            // Push the monster back 15 units so it has to chase you again
-            monster.position.addScaledVector(dir, -15);
-            console.log("Monster repelled!");
-          }
         }
       });
     </script>
 </head>
-<body style="margin: 0; background: #000;">
-
-    <a-scene physics="gravity: -9.8" fog="type: exponential; color: #080808; density: 0.15">
+<body style="margin: 0; background: #87CEEB;"> <a-scene physics="gravity: -9.8; debug: false">
         
-        <a-entity id="rig" position="0 1.6 0" dynamic-body="mass: 1; shape: sphere">
+        <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+        <a-entity light="type: directional; intensity: 0.6; castShadow: true" position="-1 10 1"></a-entity>
+
+        <a-entity id="rig" position="0 1 0" dynamic-body="mass: 1; shape: sphere">
             <a-camera id="camera" wasd-controls="enabled: false">
-                <a-entity light="type: spot; intensity: 0.7; distance: 15; angle: 25" position="0.2 -0.2 0"></a-entity>
-                <a-cursor color="cyan" raycaster="objects: .clickable" gorilla-move></a-cursor>
+                <a-cursor color="black" raycaster="objects: .clickable" gorilla-move></a-cursor>
             </a-camera>
+
+            <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 2">
+                <a-sphere radius="0.1" color="#555" position="0 0 0"></a-sphere> </a-entity>
+            <a-entity laser-controls="hand: right" raycaster="objects: .clickable; far: 2">
+                <a-sphere radius="0.1" color="#555" position="0 0 0"></a-sphere> </a-entity>
         </a-entity>
 
-        <a-entity id="monster" stalker-ai position="0 1 -25">
-            <a-box width="1.2" height="3.5" depth="0.6" color="#000">
-                <a-sphere color="#ff0000" radius="0.1" position="-0.2 1.2 0.3" material="emissive: red"></a-sphere>
-                <a-sphere color="#ff0000" radius="0.1" position="0.2 1.2 0.3" material="emissive: red"></a-sphere>
-            </a-box>
-        </a-entity>
+        <a-plane class="clickable" 
+                 static-body 
+                 rotation="-90 0 0" 
+                 width="200" 
+                 height="200" 
+                 color="#7CFC00" 
+                 src="https://cdn.aframe.io/a-blast/assets/images/floor.png" 
+                 repeat="100 100">
+        </a-plane>
 
-        <a-plane class="clickable" static-body rotation="-90 0 0" width="100" height="100" color="#111"></a-plane>
-        
-        <a-box class="clickable" static-body position="-8 3 -10" width="3" height="6" color="#1a1a1a"></a-box>
-        <a-box class="clickable" static-body position="8 3 -15" width="3" height="6" color="#1a1a1a"></a-box>
-        <a-box class="clickable" static-body position="0 3 12" width="4" height="6" color="#1a1a1a"></a-box>
-
-        <a-sky color="#080808"></a-sky>
-        <a-entity light="type: ambient; color: #222; intensity: 0.2"></a-entity>
+        <a-sky color="#87CEEB"></a-sky> <a-box class="clickable" static-body position="-5 2.5 -10" width="4" height="5" color="#FFD700"></a-box>
+        <a-box class="clickable" static-body position="5 1.5 -15" width="4" height="3" color="#FF6347"></a-box>
+        <a-box class="clickable" static-body position="0 4 15" width="6" height="8" color="#4169E1"></a-box>
 
     </a-scene>
 </body>
