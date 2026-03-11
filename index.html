@@ -2,56 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bright Gorilla VR</title>
+    <title>Fixed Gorilla VR</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-physics-system@v4.2.2/dist/aframe-physics-system.min.js"></script>
     
     <script>
-      // GORILLA LOCOMOTION
       AFRAME.registerComponent('gorilla-move', {
         init: function () {
           this.el.addEventListener('click', (evt) => {
             const rig = document.querySelector('#rig');
             const camera = document.querySelector('#camera');
-            const direction = new THREE.Vector3();
-            camera.object3D.getWorldDirection(direction);
+            const dir = new THREE.Vector3();
             
-            // Fling logic: X and Z for push, Y for jump
-            rig.body.velocity.set(-direction.x * 7, 5, -direction.z * 7);
+            // Get direction from the camera
+            camera.object3D.getWorldDirection(dir);
+            
+            // STOP SPINNING: We reset angular velocity every time you move
+            if (rig.body) {
+                rig.body.angularVelocity.set(0, 0, 0); 
+                rig.body.velocity.set(-dir.x * 8, 5, -dir.z * 8);
+            }
           });
         }
       });
     </script>
 </head>
-<body style="margin: 0; background: #87CEEB;"> <a-scene physics="gravity: -9.8; debug: false">
-        
-        <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-        <a-entity light="type: directional; intensity: 0.6; castShadow: true" position="-1 10 1"></a-entity>
+<body style="margin: 0; background: #87CEEB;">
 
-        <a-entity id="rig" position="0 1 0" dynamic-body="mass: 1; shape: sphere">
-            <a-camera id="camera" wasd-controls="enabled: false">
+    <a-scene physics="gravity: -9.8; debug: false">
+        
+        <a-entity light="type: ambient; intensity: 0.9"></a-entity>
+        <a-entity light="type: directional; intensity: 0.5" position="1 10 1"></a-entity>
+
+        <a-entity id="rig" position="0 1 0" dynamic-body="mass: 1; shape: sphere; sphereRadius: 0.5; fixedRotation: true">
+            <a-camera id="camera" wasd-controls="enabled: false" look-controls="pointerLockEnabled: true">
                 <a-cursor color="black" raycaster="objects: .clickable" gorilla-move></a-cursor>
             </a-camera>
 
-            <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 2">
-                <a-sphere radius="0.1" color="#555" position="0 0 0"></a-sphere> </a-entity>
-            <a-entity laser-controls="hand: right" raycaster="objects: .clickable; far: 2">
-                <a-sphere radius="0.1" color="#555" position="0 0 0"></a-sphere> </a-entity>
+            <a-entity oculus-touch-controls="hand: left"></a-entity>
+            <a-entity oculus-touch-controls="hand: right"></a-entity>
         </a-entity>
 
-        <a-plane class="clickable" 
-                 static-body 
-                 rotation="-90 0 0" 
-                 width="200" 
-                 height="200" 
-                 color="#7CFC00" 
-                 src="https://cdn.aframe.io/a-blast/assets/images/floor.png" 
-                 repeat="100 100">
-        </a-plane>
+        <a-plane class="clickable" static-body rotation="-90 0 0" width="500" height="500" color="#4CAF50"></a-plane>
 
-        <a-sky color="#87CEEB"></a-sky> <a-box class="clickable" static-body position="-5 2.5 -10" width="4" height="5" color="#FFD700"></a-box>
-        <a-box class="clickable" static-body position="5 1.5 -15" width="4" height="3" color="#FF6347"></a-box>
-        <a-box class="clickable" static-body position="0 4 15" width="6" height="8" color="#4169E1"></a-box>
+        <a-sky color="#87CEEB"></a-sky>
+
+        <a-box class="clickable" static-body position="-5 2 -10" color="orange"></a-box>
+        <a-box class="clickable" static-body position="5 2 -10" color="red"></a-box>
 
     </a-scene>
 </body>
